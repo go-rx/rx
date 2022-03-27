@@ -2,7 +2,7 @@ package rx
 
 func Take[T any](source Observable[T], n int) Observable[T] {
 	return Func(func(subscriber Writer[T]) (err error) {
-		writer, reader := Pipe(PipeWithParentLifecycle[T](subscriber))
+		writer, reader := Pipe[T](subscriber)
 		source.Subscribe(writer)
 		count := 0
 		if n <= count {

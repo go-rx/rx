@@ -2,16 +2,16 @@ package rx
 
 type writerT[T any] struct {
 	Lifecycle
-	c chan<- T
+	c chan<- any
 }
 
 type readerT[T any] struct {
 	Lifecycle
-	c <-chan T
+	c <-chan any
 }
 
-func Pipe[T any](options ...PipeOption[T]) (writer Writer[T], reader Reader[T]) {
-	opts := &pipeOptions[T]{}
+func Pipe[T any](parent Lifecycle, options ...PipeOption) (writer Writer[T], reader Reader[T]) {
+	opts := &pipeOptions{}
 	for _, option := range options {
 		option(opts)
 	}
@@ -19,16 +19,12 @@ func Pipe[T any](options ...PipeOption[T]) (writer Writer[T], reader Reader[T]) 
 		opts.childLifecycle = NewLifecycle()
 	}
 	if opts.childChannel == nil {
-		opts.childChannel = make(chan T)
+		opts.childChannel = make(chan any)
 	}
-	Bind(opts.parentLifecycle, opts.childLifecycle)
+	Bind(parent, opts.childLifecycle)
 	writer = &writerT[T]{opts.childLifecycle, opts.childChannel}
 	reader = &readerT[T]{opts.childLifecycle, opts.childChannel}
 	return
-}
-
-func (w *writerT[T]) C() chan<- T {
-	return w.c
 }
 
 func (w *writerT[T]) Write(value T) (ok bool) {
@@ -40,40 +36,31 @@ func (w *writerT[T]) Write(value T) (ok bool) {
 	return
 }
 
-func (r readerT[T]) C() <-chan T {
-	return r.c
-}
-
 func (r *readerT[T]) Read() (value T, ok bool) {
+	var v any
 	select {
-	case value, ok = <-r.c:
+	case v, ok = <-r.c:
+		value, ok = v.(T)
 	case <-r.Dying():
 	}
 	return
 }
 
-type pipeOptions[T any] struct {
-	parentLifecycle Lifecycle
-	childLifecycle  Lifecycle
-	childChannel    chan T
+type pipeOptions struct {
+	childLifecycle Lifecycle
+	childChannel   chan any
 }
 
-type PipeOption[T any] func(*pipeOptions[T])
+type PipeOption func(*pipeOptions)
 
-func PipeWithParentLifecycle[T any](parent Lifecycle) PipeOption[T] {
-	return func(o *pipeOptions[T]) {
-		o.parentLifecycle = parent
-	}
-}
-
-func PipeWithChildLifecycle[T any](child Lifecycle) PipeOption[T] {
-	return func(o *pipeOptions[T]) {
+func PipeWithChildLifecycle(child Lifecycle) PipeOption {
+	return func(o *pipeOptions) {
 		o.childLifecycle = child
 	}
 }
 
-func PipeWithChildChannel[T any](c chan T) PipeOption[T] {
-	return func(o *pipeOptions[T]) {
+func PipeWithChildChannel(c chan any) PipeOption {
+	return func(o *pipeOptions) {
 		o.childChannel = c
 	}
 }

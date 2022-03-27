@@ -73,7 +73,7 @@ func TestOperatorSwitchMap(test *testing.T) {
 		fmt.Println("Source emitted 5")
 		return
 	})
-	writer, reader := Pipe[int]()
+	writer, reader := Pipe[int](nil)
 	start := time.Now()
 	SwitchMap(source, project).Subscribe(writer)
 	v, ok := reader.Read()

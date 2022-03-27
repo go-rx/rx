@@ -73,7 +73,7 @@ func MergeMap[T any, S any](source Observable[T], project func(T) Observable[S],
 						}()
 
 						innerObservable = project(outerValue)
-						innerWriter, innerReader := Pipe(PipeWithParentLifecycle[S](subscriber))
+						innerWriter, innerReader := Pipe[S](subscriber)
 						subscriber.Go(func() (err error) {
 							for {
 								if innerValue, ok := innerReader.Read(); ok {
@@ -103,7 +103,7 @@ func MergeMap[T any, S any](source Observable[T], project func(T) Observable[S],
 			spawnWorker(true)
 		}
 
-		outerWriter, outerReader := Pipe(PipeWithParentLifecycle[T](subscriber))
+		outerWriter, outerReader := Pipe[T](subscriber)
 		subscriber.Go(func() (err error) {
 			outstandingJobs := 0
 			workerCount := opts.standbyConcurrency

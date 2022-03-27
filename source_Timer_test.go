@@ -11,7 +11,7 @@ import (
 
 func TestSourceTimer(test *testing.T) {
 	fmt.Println("Testing source Timer...")
-	writer, reader := Pipe[int]()
+	writer, reader := Pipe[int](nil)
 	start := time.Now()
 	Timer(time.Second, 100*time.Millisecond).Subscribe(writer)
 	v, ok := reader.Read()

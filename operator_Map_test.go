@@ -9,7 +9,7 @@ import (
 
 func TestOperatorMap(test *testing.T) {
 	fmt.Println("Testing operator Map...")
-	writer, reader := Pipe[string]()
+	writer, reader := Pipe[string](nil)
 	Map(
 		List([]int{1, 2, 3}),
 		func(value int) (string, error) {

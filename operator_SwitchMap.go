@@ -2,7 +2,7 @@ package rx
 
 func SwitchMap[T any, S any](source Observable[T], project func(T) Observable[S]) Observable[S] {
 	return Func(func(subscriber Writer[S]) (err error) {
-		outerWriter, outerReader := Pipe(PipeWithParentLifecycle[T](subscriber))
+		outerWriter, outerReader := Pipe[T](subscriber)
 		source.Subscribe(outerWriter)
 		var innerLifecycle Lifecycle
 		for {
@@ -22,7 +22,7 @@ func SwitchMap[T any, S any](source Observable[T], project func(T) Observable[S]
 			}
 
 			innerObservable = project(outerValue)
-			innerWriter, innerReader := Pipe(PipeWithParentLifecycle[S](subscriber))
+			innerWriter, innerReader := Pipe[S](subscriber)
 			subscriber.Go(func() (err error) {
 				for {
 					if innerValue, ok := innerReader.Read(); ok {

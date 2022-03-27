@@ -9,7 +9,7 @@ import (
 
 func TestOperatorTake(test *testing.T) {
 	fmt.Println("Testing operator Take...")
-	writer, reader := Pipe[int]()
+	writer, reader := Pipe[int](nil)
 	Take(List([]int{1, 2, 3}), 2).Subscribe(writer)
 	v, ok := reader.Read()
 	assert.Equal(test, 1, v)

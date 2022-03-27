@@ -11,7 +11,7 @@ import (
 
 func TestSourceTicker(test *testing.T) {
 	fmt.Println("Testing source Ticker...")
-	writer, reader := Pipe[int]()
+	writer, reader := Pipe[int](nil)
 	start := time.Now()
 	Ticker(100 * time.Millisecond).Subscribe(writer)
 	v, ok := reader.Read()
