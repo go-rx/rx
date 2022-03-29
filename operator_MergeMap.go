@@ -12,10 +12,7 @@ type mergeMapOptions struct {
 type MergeMapOption func(*mergeMapOptions)
 
 func MergeMap[T any, S any](source Observable[T], project func(T) Observable[S], options ...MergeMapOption) Observable[S] {
-	opts := &mergeMapOptions{}
-	for _, option := range options {
-		option(opts)
-	}
+	opts := buildOptions(options)
 	return Func(func(subscriber Writer[S]) (err error) {
 		if opts.standbyConcurrency < 0 {
 			subscriber.Kill(fmt.Errorf("MergeMap: standbyConcurrency cannot be nagative: %w", ErrInvalidParameter))

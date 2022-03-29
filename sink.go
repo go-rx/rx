@@ -5,10 +5,7 @@ type sinkT[T any] struct {
 }
 
 func Sink[T any](parent Lifecycle, options ...SinkOption) (sink Writer[T]) {
-	opts := &sinkOptions{}
-	for _, option := range options {
-		option(opts)
-	}
+	opts := buildOptions(options)
 	if opts.childLifecycle == nil {
 		opts.childLifecycle = NewLifecycle()
 	}

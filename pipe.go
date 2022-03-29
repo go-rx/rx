@@ -11,10 +11,7 @@ type readerT[T any] struct {
 }
 
 func Pipe[T any](parent Lifecycle, options ...PipeOption) (writer Writer[T], reader Reader[T]) {
-	opts := &pipeOptions{}
-	for _, option := range options {
-		option(opts)
-	}
+	opts := buildOptions(options)
 	if opts.childLifecycle == nil {
 		opts.childLifecycle = NewLifecycle()
 	}
