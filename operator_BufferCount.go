@@ -31,10 +31,10 @@ func BufferCount[T any](source Observable[T], bufferSize int, options ...BufferC
 				return
 			}
 
-			count++
 			if count%opts.startBufferEvery == 0 {
 				buffers = append(buffers, nil)
 			}
+			count++
 
 			var newBuffers [][]T
 			for _, buffer := range buffers {
