@@ -61,3 +61,9 @@ type BufferCountOption func(*bufferCountOptions)
 type bufferCountOptions struct {
 	startBufferEvery int
 }
+
+func BufferCountWithStartBufferEvery(startBufferEvery int) BufferCountOption {
+	return func(o *bufferCountOptions) {
+		o.startBufferEvery = startBufferEvery
+	}
+}
