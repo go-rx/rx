@@ -21,17 +21,34 @@ func NewLifecycle() Lifecycle {
 	return &tomb.Tomb{}
 }
 
-func Bind(parent, child Lifecycle) {
+func Bind(parent, child Lifecycle, options ...BindOption) {
 	if parent == nil || child == nil {
 		return
 	}
+	opts := buildOptions(options)
 	parent.Go(func() (err error) {
 		select {
 		case <-child.Dying():
-			err = child.Wait()
+			if opts.discardChildError {
+				child.Wait()
+			} else {
+				err = child.Wait()
+			}
 		case <-parent.Dying():
 			child.Kill(parent.Err())
 		}
 		return
 	})
+}
+
+func BindWithDiscardChildError() BindOption {
+	return func(o *bindOptions) {
+		o.discardChildError = true
+	}
+}
+
+type BindOption func(*bindOptions)
+
+type bindOptions struct {
+	discardChildError bool
 }

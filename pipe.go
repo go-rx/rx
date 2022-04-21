@@ -18,7 +18,7 @@ func Pipe[T any](parent Lifecycle, options ...PipeOption) (writer Writer[T], rea
 	if opts.childChannel == nil {
 		opts.childChannel = make(chan any)
 	}
-	Bind(parent, opts.childLifecycle)
+	Bind(parent, opts.childLifecycle, opts.bindOptions...)
 	writer = &writerT[T]{opts.childLifecycle, opts.childChannel}
 	reader = &readerT[T]{opts.childLifecycle, opts.childChannel}
 	return
@@ -46,6 +46,7 @@ func (r *readerT[T]) Read() (value T, ok bool) {
 type pipeOptions struct {
 	childLifecycle Lifecycle
 	childChannel   chan any
+	bindOptions    []BindOption
 }
 
 type PipeOption func(*pipeOptions)
@@ -59,5 +60,11 @@ func PipeWithChildLifecycle(child Lifecycle) PipeOption {
 func PipeWithChildChannel(c chan any) PipeOption {
 	return func(o *pipeOptions) {
 		o.childChannel = c
+	}
+}
+
+func PipeWithDiscardChildError() PipeOption {
+	return func(o *pipeOptions) {
+		o.bindOptions = append(o.bindOptions, BindWithDiscardChildError())
 	}
 }
